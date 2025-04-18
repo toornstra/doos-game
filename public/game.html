@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>DOOS - Game</title>
+</head>
+<body>
+  <h1>DOOS - Spel bezig</h1>
+  <h2 id="stelling">Laden...</h2>
+  <div id="resultaat" style="margin-top: 20px;"></div>
+
+  <!-- Stemknoppen -->
+  <div id="vote-buttons">
+    <button onclick="stemmen('underrated')">underrated</button>
+    <button onclick="stemmen('overrated')">overrated</button>
+  </div>
+
+  <!-- Alleen zichtbaar voor de host -->
+  <div id="host-controls" style="display: none; margin-top: 20px;">
+    <button onclick="veranderStelling('prev')">← Vorige</button>
+    <button id="nextButton" onclick="veranderStelling('next')">Volgende →</button>
+  </div>
+
+<div id="result-container"></div>
+
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const urlParams = new URLSearchParams(window.location.search);
+    const lobbyId = urlParams.get("lobby");
+    const username = urlParams.get("username");
+
+    let isHost = false;
+
+    socket.emit("joinLobbyPage", { lobbyId, username });
+
+    socket.on("youAreHost", () => {
+      isHost = true;
+      document.getElementById("host-controls").style.display = "block";
+    });
+
+    socket.on("showStelling", (stelling) => {
+  document.getElementById("stelling").textContent = stelling;
+
+  // Nieuwe stelling = opnieuw stemmen mogelijk
+  document.getElementById("vote-buttons").style.display = "block";
+
+  // 🔧 Verberg het oude resultaat zodra een nieuwe stelling komt
+  document.getElementById("resultaat").innerHTML = "";
+});
+
+
+    socket.emit("getCurrentStelling", lobbyId);
+
+   let resultaatIsGetoond = false;
+
+function veranderStelling(direction) {
+  if (!isHost) return;
+
+  if (direction === 'next') {
+    if (!resultaatIsGetoond) {
+      socket.emit("nextStelling", lobbyId);
+      resultaatIsGetoond = true;
+      document.getElementById("nextButton").innerText = "Toon volgende stelling";
+    } else {
+      socket.emit("toonVolgendeStelling", lobbyId);
+      resultaatIsGetoond = false;
+      document.getElementById("nextButton").innerText = "Volgende →";
+      document.getElementById("resultaat").innerHTML = ""; // Leeg resultaat
+    }
+  } else if (direction === 'prev') {
+    socket.emit("changeStelling", { lobbyId, direction });
+  }
+}
+
+
+    function stemmen(keuze) {
+      socket.emit("stem", { lobbyId, username, keuze });
+      document.getElementById("vote-buttons").style.display = "none"; // Verberg na stemmen
+    }
+
+    socket.on("showResultaat", ({ resultaat, stemmen }) => {
+      const container = document.getElementById("resultaat");
+
+      let html = `<h3>Resultaat: ${resultaat}</h3>`;
+      html += `<ul>`;
+      stemmen.forEach(([naam, stem]) => {
+        html += `<li>${naam}: ${stem}</li>`;
+      });
+      html += `</ul>`;
+
+      container.innerHTML = html;
+    });
+
+    socket.on("allResults", (resultaten) => {
+  // Toon de resultaten op een overzichtspagina
+  console.log("Alle resultaten:", resultaten);
+  // Hier kun je de resultaten renderen in een tabel of lijst
+});
+
+function toonVolgendeStelling(lobbyId) {
+  const lobby = lobbies[lobbyId];
+  if (!lobby) return;
+
+  if (lobby.currentStellingIndex < lobby.stellingen.length - 1) {
+    lobby.currentStellingIndex++;
+    const nieuweStelling = lobby.stellingen[lobby.currentStellingIndex] || "Geen stelling";
+    io.to(lobbyId).emit("showStelling", nieuweStelling);
+  } else {
+    // Voeg het einde van het spel toe
+    io.to(lobbyId).emit("endGame", "Het spel is afgelopen!");
+    showAllResults(lobbyId); // Toon de eindresultaten
+  }
+}
+
+socket.on("endGame", (message) => {
+  // Toon een einde bericht en eventueel een knop om terug naar de lobby te gaan
+  document.getElementById("stelling").textContent = message;
+  document.getElementById("vote-buttons").style.display = "none";
+  document.getElementById("host-controls").style.display = "none";  // Verberg host controls
+  document.getElementById("resultaat").innerHTML = "";  // Zorg ervoor dat het resultaat zichtbaar is als het spel is afgelopen
+});
+
+socket.on("allResults", (resultaten) => {
+  console.log("Alle resultaten:", resultaten);
+  // Hier kun je de resultaten renderen in een lijst of tabel
+  const resultContainer = document.getElementById("result-container");
+  resultContainer.innerHTML = ""; // Maak de container leeg
+
+  resultaten.forEach((resultaat) => {
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <p><strong>Stelling:</strong> ${resultaat.stelling}</p>
+      <p><strong>Resultaat:</strong> ${resultaat.resultaat}</p>
+      <p><strong>Stemmen:</strong></p>
+      <ul>
+        ${resultaat.stemmen.map(([username, stem]) => `<li>${username}: ${stem}</li>`).join("")}
+      </ul>
+    `;
+    resultContainer.appendChild(div);
+  });
+});
+
+
+  </script>
+</body>
+</html>
