@@ -1,0 +1,200 @@
+/* Algemene reset en font */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  color: white;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: url('pitchh.jpeg') no-repeat center center fixed;
+  background-size: cover;
+  background-attachment: fixed;
+  background-blend-mode: overlay;
+  overflow-x: hidden;
+}
+
+/* Titels */
+h1, h2 {
+  text-shadow: 2px 2px #00000050;
+  color: #FFD700;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 3em;
+}
+
+h2 {
+  font-size: 1.5em;
+}
+
+/* Knoppen */
+button {
+  padding: 12px;
+  font-size: 1em;
+  background-color: #FFD700;
+  color: #006400;
+  font-weight: bold;
+  border: 2px solid #006400;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+button:hover {
+  background-color: #FFC300;
+  transform: scale(1.05);
+}
+
+#start-button {
+  margin-top: 350px;
+  width: 400px;
+}
+
+#home-button {
+  width: auto;
+  padding: 10px 20px;
+  margin-top: 100px;
+}
+
+#navigatieKnoppen {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+}
+
+/* Inputvelden */
+input[type="text"] {
+  padding: 10px;
+  margin: 5px 0 15px;
+  width: 100%;
+  border: none;
+  border-radius: 6px;
+  font-size: 1em;
+}
+
+/* Container met beide lijsten */
+#lijsten-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  width: 100%;
+  max-width: 1200px;
+  padding: 40px 20px;
+  flex-wrap: wrap; /* mobielvriendelijk */
+}
+
+/* Lijst en Top 10 cards */
+.lijst-card {
+  flex: 4;
+  min-width: 300px;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+}
+
+.top10-card {
+  flex: 1;
+  min-width: 250px;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  color: white;
+}
+
+/* Nummering alleen voor de top10 lijst */
+#top10 {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+  counter-reset: item;  /* Voeg dit toe om de nummering te starten */
+}
+
+/* Nummering aan de items toevoegen in de top10 lijst */
+#top10 li {
+  padding: 12px 20px;
+  margin-bottom: 10px;
+  background-color: #FFD700;
+  color: #006400;
+  font-weight: bold;
+  border-radius: 10px;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  counter-increment: item;  /* Dit zorgt ervoor dat de nummering toeneemt */
+  padding-left: 30px; /* Vergroot de ruimte tussen nummer en tekst */
+}
+
+/* Nummer zichtbaar in de top10 lijst */
+#top10 li::before {
+  content: counter(item) ".";
+  position: absolute;
+  left: 10px;
+  font-size: 1.em;
+  font-weight: bold;
+  color: #006400;
+  margin-right: 10px;
+  display: inline-block;
+  min-width: 20px; /* Zorg ervoor dat nummers altijd een vaste breedte hebben */
+  left: 10px; /* Zorg ervoor dat het nummer aan de linkerzijde blijft */
+  text-align: center;
+}
+
+/* Voor de lijst zonder nummering (spelerslijst) */
+#lijst {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+}
+
+/* Stijlen voor de lijstitems in de spelerslijst */
+#lijst li {
+  padding: 12px 20px;
+  margin-bottom: 10px;
+  background-color: #FFD700;
+  color: #006400;
+  font-weight: bold;
+  border-radius: 10px;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+#lijst li:hover {
+  transform: scale(1.03);
+  background-color: #FFC300;
+}
+
+
+/* Resultaat sectie in dezelfde stijl als lijst-card/top10-card */
+#resultaat {
+  background-color: #FFC300;/* Zelfde als .lijst-card */
+  padding: 20px;
+  border-radius: 16px;
+  backdrop-filter: blur(6px);
+  color: #006400;
+  margin: 30px auto;
+  font-size: 1.2em;
+  text-align: center;
+}
+
+
+#top10 li.empty-slot {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #cccccc;
+  font-style: italic;
+  cursor: default;
+}
